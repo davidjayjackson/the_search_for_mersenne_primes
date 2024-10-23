@@ -1,0 +1,73 @@
+---
+title: "The Serach For Mersenne Prime"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(gmp)
+library(DT)
+```
+
+# Run for A Given Period of Minutes
+
+
+```{r}
+rm(list=ls())
+
+# Function to check if a number is prime
+is_prime <- function(n) {
+  return(isprime(as.bigz(n)))
+}
+
+# Function to search for Mersenne primes with a time limit and store them in a data frame
+search_mersenne_primes <- function(time_limit_minutes) {
+  # Initialize an empty data frame
+  mersenne_primes_df <- data.frame(n = integer(0), mersenne_prime = character(0), stringsAsFactors = FALSE)
+  
+  # Get the current time
+  start_time <- Sys.time()
+  time_limit <- time_limit_minutes * 60  # Convert minutes to seconds
+  
+  n <- 2  # Start searching from n = 2
+  
+  while (TRUE) {
+    # Check the elapsed time
+    elapsed_time <- as.numeric(Sys.time() - start_time, units="secs")
+    if (elapsed_time >= time_limit) {
+      # Convert the elapsed time back to minutes for display
+      elapsed_minutes <- elapsed_time / 60
+      cat("\nTime limit of", time_limit_minutes, "minutes reached. The program ran for", round(elapsed_minutes, 2), "minutes.\n")
+      break
+    }
+    
+    if (is_prime(n)) {
+      # Calculate Mersenne number 2^n - 1
+      mersenne_number <- as.bigz(2)^n - 1
+      
+      # Check if the Mersenne number is prime
+      if (is_prime(mersenne_number)) {
+        # Add the result to the data frame
+        mersenne_primes_df <- rbind(mersenne_primes_df, data.frame(n = n, mersenne_prime = as.character(mersenne_number)))
+        cat("Mersenne prime found: 2^", n, " - 1 = ", mersenne_number, "\n")
+      }
+    }
+    
+    n <- n + 1  # Increment n for the next prime check
+  }
+  
+  return(mersenne_primes_df)
+}
+
+# Set the time limit in minutes
+time_limit_minutes <- 30  # Set to 1 minute for testing (you can change this value)
+
+# Search for Mersenne primes within the time limit
+mersenne_primes_df <- search_mersenne_primes(time_limit_minutes)
+
+# Display the data frame as a pretty table using DT
+cat("\nDisplaying the data frame as a pretty table:\n")
+datatable(mersenne_primes_df, options = list(pageLength = 5, autoWidth = TRUE))
+
+```
