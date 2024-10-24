@@ -1,4 +1,5 @@
 library(gmp)
+library(DT)
 
 rm(list=ls())
 
@@ -47,7 +48,7 @@ search_mersenne_primes <- function(time_limit_minutes) {
 }
 
 # Set the time limit in minutes
-time_limit_minutes <- 5  # Set to 1 minute for testing (you can change this value)
+time_limit_minutes <- 60  # Set to 1 minute for testing (you can change this value)
 
 # Search for Mersenne primes within the time limit
 mersenne_primes_df <- search_mersenne_primes(time_limit_minutes)
@@ -56,3 +57,8 @@ mersenne_primes_df <- search_mersenne_primes(time_limit_minutes)
 cat("\nDisplaying the data frame as a pretty table:\n")
 datatable(mersenne_primes_df, options = list(pageLength = 5, autoWidth = TRUE))
 # Write results to a duckdb database
+library(duckdb)
+library(DBI)
+con <- dbConnect(duckdb(), dbdir = "./merennse.duckdb", read_only = FALSE)
+dbWriteTable(con,"primes",mersenne_primes_df,overwrite=FALSE,append=TRUE)
+dbDisconnect(con)
